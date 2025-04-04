@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from 'src/common/schemas/user.schema';
-
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -11,22 +11,38 @@ export class UsersService {
     async createUser(createUserDto) {
         try {
             const existingUser = await this.userModel.findOne({ email: createUserDto.email });
-
             if (existingUser) {
                 throw new Error('Email already exists');
+            } else  {
+                const hashedPassword = await bcrypt.hash(createUserDto.password, 16);
+                const newUser = new this.userModel({
+                    ...createUserDto,
+                    password: hashedPassword
+                });
+                return await newUser.save();
             }
-            
-            const newUser = new this.userModel(createUserDto);
-            console.log('newUser', newUser);
-            return await newUser.save();
         }
         catch (error) {
             throw error;
         }
-
     }
 
-    findAll() {
-
+    async validateUser(email: string, password: string) {
+        try {
+            const existingUser = await this.userModel.findOne({ email: email });
+            if (!existingUser) {
+                throw new Error('User does not exists');
+            } else {
+                const isMatch = await bcrypt.compare(password, existingUser.password);
+                if (!isMatch) {
+                    throw new Error('Invalid password');
+                }
+                return existingUser;
+            }
+        }
+        catch (error) {
+            throw error;
+        }
     }
+
 }
