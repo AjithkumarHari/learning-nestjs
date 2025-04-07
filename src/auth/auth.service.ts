@@ -16,9 +16,11 @@ export class AuthService {
             const user = await this.userService.createUser(registerDto);
             const token = this.jwtService.sign({ id: user._id, email: user.email });
             return {
-                id: user._id,
-                name: user.name,
-                email: user.email,
+                user: {
+                    id: user._id,
+                    name: user.name,
+                    email: user.email,
+                },
                 token: token,
             };
         } catch (error) {
@@ -31,9 +33,11 @@ export class AuthService {
             const user = await this.userService.validateUser(loginDto.email, loginDto.password);
             const token = this.jwtService.sign({ id: user._id, email: user.email });
             return {
-                id: user._id,
-                name: user.name,
-                email: user.email,
+                user: {
+                    id: user._id,
+                    name: user.name,
+                    email: user.email,
+                },
                 token: token,
             };         
         } catch (error) {

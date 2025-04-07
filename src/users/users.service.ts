@@ -45,4 +45,12 @@ export class UsersService {
         }
     }
 
+    async getAllUsers() {
+        try {
+            return await this.userModel.find().select('-password').exec();
+        } catch (error) {
+            throw error;
+        }
+    }
+
 }
