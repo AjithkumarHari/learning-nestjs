@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Res, HttpStatus, BadRequestException, Get, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { Response } from 'express';
-import { AuthGuard } from 'src/auth/guards/userAuth.guard';
+import { AuthGuard } from 'src/guards/userAuth.guard';
 
 
 @Controller('users')
