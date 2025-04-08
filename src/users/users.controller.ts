@@ -1,6 +1,7 @@
-import { Controller, Post, Body, Res, HttpStatus, BadRequestException, Get } from '@nestjs/common';
+import { Controller, Post, Body, Res, HttpStatus, BadRequestException, Get, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { Response } from 'express';
+import { AuthGuard } from 'src/auth/guards/userAuth.guard';
 
 
 @Controller('users')
@@ -8,6 +9,7 @@ export class UsersController {
     constructor(private readonly usersService: UsersService) { }
 
     @Get('allUsers')
+    @UseGuards(AuthGuard)
     async getAllUsers(@Res() res: Response) {
         try {
             const users = await this.usersService.getAllUsers();

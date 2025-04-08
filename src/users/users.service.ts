@@ -53,4 +53,12 @@ export class UsersService {
         }
     }
 
+    async getUserById(id: string) {
+        try {
+            return await this.userModel.findById(id).select('-password').exec();
+        } catch (error) {
+            throw error;
+        }
+    }
+
 }
