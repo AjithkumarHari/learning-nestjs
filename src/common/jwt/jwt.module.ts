@@ -16,7 +16,10 @@ import { JwtAuthService } from './jwt.service';
             inject: [ConfigService],
         }),
     ],
-    providers: [AuthGuard, JwtAuthService],
+    providers: [
+        AuthGuard, 
+        JwtAuthService
+    ],
     exports: [
         NestJwtModule,
         AuthGuard,
