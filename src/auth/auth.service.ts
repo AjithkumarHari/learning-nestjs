@@ -1,20 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
-import { JwtAuthService } from 'src/common/jwt/jwt.service'; 
-import { LoginDto } from './dto/login.dto';
-import { CreateUserDto } from '../auth/dto/create-user.dto';
+import { JwtAuthService } from 'src/common/jwt/jwt.service';
+import { LoginDto } from '../dto/login.dto';
+import { CreateUserDto } from '../dto/createUser.dto';
 
 @Injectable()
 export class AuthService {
     constructor(
         private readonly userService: UsersService,
         private readonly jwtAuthService: JwtAuthService,
-    ) {}
+    ) { }
 
     async register(registerDto: CreateUserDto): Promise<any> {
-         try {
+        try {
             const user = await this.userService.createUser(registerDto);
-            // const token = signToken({ id: user._id, email: user.email });
             const token = this.jwtAuthService.signToken({ id: user._id, email: user.email });
             return {
                 user: {
@@ -40,7 +39,7 @@ export class AuthService {
                     email: user.email,
                 },
                 token: token,
-            };         
+            };
         } catch (error) {
             throw error;
         }

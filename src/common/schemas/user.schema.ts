@@ -13,6 +13,9 @@ export class User {
 
     @Prop({ required: true })
     password: string;
+
+    @Prop({ required: false })
+    profileImage: string;
     
     @Prop({ default: false })
     isActive: boolean;
