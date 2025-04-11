@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Res, HttpStatus, BadRequestException, NotFoundException, ConflictException, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto } from '../dto/login.dto';
-import { CreateUserDto } from '../dto/createUser.dto';
+import { LoginDto } from '../../dto/login.dto';
+import { CreateUserDto } from '../../dto/createUser.dto';
 import { Response } from 'express';
 
 @Controller('auth')
