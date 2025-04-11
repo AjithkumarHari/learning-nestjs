@@ -22,10 +22,14 @@ export class UsersController {
 
     @Put('update/:id')
     @UseGuards(AuthGuard)
-    async updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @Res() res: Response) {
+    async updateUser(
+        @Param('id') id: string,
+        @Body() updateUserDto: UpdateUserDto,
+        @Res() res: Response) {
         try {
-            const updatedUser = await this.usersService.updateUser(id, updateUserDto);
-            res.status(HttpStatus.OK).send(updatedUser);
+            const user = await this.usersService.updateUser(id, updateUserDto);
+            res.status(HttpStatus.OK);
+            res.send({ message: 'User updated successfully', user });
         } catch (error) {
             if (error.message === 'User not found') {
                 throw new NotFoundException(error.message);

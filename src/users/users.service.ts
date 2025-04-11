@@ -5,10 +5,11 @@ import { User, UserDocument } from 'src/common/schemas/user.schema';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from 'src/dto/createUser.dto';
 import { UpdateUserDto } from 'src/dto/updateUser.dto';
+import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 
 @Injectable()
 export class UsersService {
-    constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) { }
+    constructor(@InjectModel(User.name) private userModel: Model<UserDocument>, private cloudinaryService: CloudinaryService) { }
 
     async createUser(createUserDto: CreateUserDto) {
         try {
@@ -63,17 +64,26 @@ export class UsersService {
         }
     }
 
-    async updateUser(id: string, updateUser: UpdateUserDto) {
+    async updateUser(id: string, updateUserDto: UpdateUserDto) {
         try {
-            const existingUser = await this.userModel.findById(id);
-            if (!existingUser) {
-                throw new Error('User not found');
-            } else {
-                if (updateUser.password) {
-                    updateUser.password = await bcrypt.hash(updateUser.password, 16);
-                }
-                return await this.userModel.findByIdAndUpdate(id, updateUser, { new: true }).select('-password').exec();
+            const user = await this.userModel.findById(id);
+            if (!user) throw new Error('User not found');
+
+            if (updateUserDto.profileImage) {
+                const { secure_url } = await this.cloudinaryService.uploadImage(updateUserDto.profileImage);
+                updateUserDto.profileImage = secure_url;
             }
+
+            if (updateUserDto.password) {
+                updateUserDto.password = await bcrypt.hash(updateUserDto.password, 16);
+            }
+
+            const updatedUser = await this.userModel.findByIdAndUpdate(id, updateUserDto, { new: true }).select('-password').exec();
+            if (!updatedUser) throw new Error('User update failed');
+
+            const { _id, name, email, profileImage } = updatedUser;
+            return { id: _id, name, email, profileImage };
+
         } catch (error) {
             throw error;
         }

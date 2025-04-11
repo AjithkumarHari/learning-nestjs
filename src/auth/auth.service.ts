@@ -37,10 +37,12 @@ export class AuthService {
                     id: user._id,
                     name: user.name,
                     email: user.email,
+                    profileImage: user.profileImage
                 },
                 token: token,
             };
         } catch (error) {
+            console.log('error', error);
             throw error;
         }
     }

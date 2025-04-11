@@ -6,18 +6,17 @@ import { JwtAuthService } from './jwt.service';
 
 @Module({
     imports: [
-        ConfigModule,
         NestJwtModule.registerAsync({
             imports: [ConfigModule],
             useFactory: async (config: ConfigService) => ({
-                secret: config.get<string>('JWT_SECRET'),
+                secret: config.get<string>('JWT_SECRET_KEY'),
                 signOptions: { expiresIn: config.get<string>('JWT_EXPIRES_IN') },
             }),
             inject: [ConfigService],
         }),
     ],
     providers: [
-        AuthGuard, 
+        AuthGuard,
         JwtAuthService
     ],
     exports: [
