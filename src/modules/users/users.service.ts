@@ -84,7 +84,7 @@ export class UsersService {
             const { _id, name, email, profileImage } = updatedUser;
             return { id: _id, name, email, profileImage };
 
-        } catch (error) {
+        } catch (error) { 
             throw error;
         }
     }

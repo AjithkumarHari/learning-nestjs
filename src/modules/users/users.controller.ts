@@ -1,7 +1,7 @@
 import { Controller, Body, Res, HttpStatus, BadRequestException, Get, UseGuards, Put, Param, NotFoundException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { Response } from 'express';
-import { AuthGuard } from 'src/guards/userAuth.guard';
+import { AuthGuard } from 'src/common/jwt/guards/userAuth.guard';
 import { UpdateUserDto } from 'src/dto/updateUser.dto';
 
 
