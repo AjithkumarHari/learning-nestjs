@@ -9,7 +9,10 @@ import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 
 @Injectable()
 export class UsersService {
-    constructor(@InjectModel(User.name) private userModel: Model<UserDocument>, private cloudinaryService: CloudinaryService) { }
+    constructor(@InjectModel(User.name)
+    private readonly userModel: Model<UserDocument>,
+        private readonly cloudinaryService: CloudinaryService
+    ) { }
 
     async createUser(createUserDto: CreateUserDto) {
         try {
@@ -35,13 +38,21 @@ export class UsersService {
             const existingUser = await this.userModel.findOne({ email: email });
             if (!existingUser) {
                 throw new Error('User does not exists');
-            } else {
-                const isMatch = await bcrypt.compare(password, existingUser.password);
-                if (!isMatch) {
-                    throw new Error('Invalid password');
-                }
-                return existingUser;
             }
+            const isMatch = await bcrypt.compare(password, existingUser.password);
+            if (!isMatch) {
+                throw new Error('Invalid password');
+            }
+            if (!existingUser.isActive) {
+                return {
+                    message: 'User not activated',
+                    existingUser,
+                };
+            }
+            return {
+                message: 'User logged in successfully',
+                existingUser,
+            };
         }
         catch (error) {
             throw error;
@@ -56,9 +67,9 @@ export class UsersService {
         }
     }
 
-    async getUserById(id: string) {
+    async getUserByEmail(email: string) {
         try {
-            return await this.userModel.findById(id).select('-password').exec();
+            return await this.userModel.findOne({email}).select('-password').exec();
         } catch (error) {
             throw error;
         }
@@ -84,7 +95,18 @@ export class UsersService {
             const { _id, name, email, profileImage } = updatedUser;
             return { id: _id, name, email, profileImage };
 
-        } catch (error) { 
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async activateUser(email: string) {
+        try {
+            const user = await this.userModel.findOne({ email });
+            if (!user) throw new Error('User not found');
+            user.isActive = true;
+            return await user.save();
+        } catch (error) {
             throw error;
         }
     }

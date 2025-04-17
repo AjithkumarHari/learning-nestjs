@@ -20,8 +20,36 @@ export class AuthController {
             }
             throw new BadRequestException('User registration failed');
         }
-
     }
+
+    @Post('verify-otp')
+    async verifyOtp(@Body() otpDto: { otp: string, email: string }, @Res() res: Response) {
+        try {
+            const user = await this.authService.verifyOTP(otpDto.otp, otpDto.email);
+            res.status(HttpStatus.OK);
+            res.send({ message: 'OTP verified successfully', ...user });
+        } catch (error) {
+            if (error.message === 'Invalid OTP') {
+                throw new BadRequestException(error.message);
+            }
+            throw new BadRequestException('OTP verification failed');
+        }
+    }
+
+    @Post('resend-otp')
+    async resendOtp(@Body() emailDto: { email: string }, @Res() res: Response) {
+        try {
+            const otp = await this.authService.resendOtp(emailDto.email);
+            res.status(HttpStatus.OK);
+            res.send({ message: 'OTP resent successfully', otp });
+        } catch (error) {
+            if (error.message === 'Email not found') {
+                throw new NotFoundException(error.message);
+            }
+            throw new BadRequestException('Failed to resend OTP');
+        }
+    }
+                
 
     @Post('login')
     async login(@Body() loginDto: LoginDto, @Res() res: Response) {
