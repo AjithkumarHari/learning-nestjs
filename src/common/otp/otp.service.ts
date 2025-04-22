@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
+import * as Email from 'email-templates';
+import { join } from 'path';
 
 @Injectable()
 export class OtpService {
@@ -13,22 +15,48 @@ export class OtpService {
         },
     });
 
-    async sendOtp(email: string) {
+    private emailInstance = new (Email as any)({
+        message: {
+            from: `Nest App <${process.env.EMAIL_USER}>`,
+        },
+        send: true,
+        preview: false,
+        transport: this.transporter,
+        views: {
+            root: join(__dirname, '..', '..', 'templates'),
+            options: {
+                extension: 'ejs',
+            },
+        },
+        juice: true,
+        juiceResources: {
+            preserveImportant: true,
+            webResources: {
+                relativeTo: join(__dirname, '..', '..', 'templates'),
+            },
+        },
+    });
+
+    async sendOtp(email: string, name: string) {
         try {
             const otp = Math.floor(100000 + Math.random() * 900000).toString();
             this.otps.set(email, otp);
             setTimeout(() => this.otps.delete(email), 5 * 60 * 1000);
 
-            const sendedOtp = this.transporter.sendMail({
-                from: `"Nest App" <${process.env.EMAIL_USER}>`,
-                to: email,
-                subject: 'Your OTP for verification',
-                text: `Your OTP is ${otp}`,
+            const sendedOtp = await this.emailInstance.send({
+                template: 'otp',
+                message: {
+                    to: email,
+                },
+                locals: {
+                    otp: otp,
+                    name: name,
+                },
             });
 
             if (!sendedOtp) throw new Error('Error sending OTP');
 
-            return { otpReceived: true };
+            return { otpSent: true };
 
         } catch (error) {
             throw error;
@@ -45,6 +73,27 @@ export class OtpService {
             return false;
         } catch (error) {
             throw new Error('Error verifying OTP');
+        }
+    }
+
+    async sendSuccessEmail(email: string, name: string) {
+        try {
+            const sendedEmail = await this.emailInstance.send({
+                template: 'signup_success',
+                message: {
+                    to: email,
+                },
+                locals: {
+                    name: name,
+                },
+            });
+
+            if (!sendedEmail) throw new Error('Error sending success email');
+
+            return { emailSent: true };
+
+        } catch (error) {
+            throw error;
         }
     }
 }

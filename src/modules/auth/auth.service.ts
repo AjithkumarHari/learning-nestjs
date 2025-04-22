@@ -16,7 +16,7 @@ export class AuthService {
     async register(registerDto: CreateUserDto): Promise<any> {
         try {
             const user = await this.userService.createUser(registerDto);
-            return await this.otpService.sendOtp(user.email);
+            return await this.otpService.sendOtp(user.email, user.name);
         } catch (error) {
             throw error;
         }
@@ -30,6 +30,7 @@ export class AuthService {
             }
             const user = await this.userService.activateUser(email);
             const token = this.jwtAuthService.signToken({ id: user._id, email: user.email });
+            await this.otpService.sendSuccessEmail(user.email, user.name);
             return {
                 user: {
                     id: user._id,
@@ -50,19 +51,18 @@ export class AuthService {
             if (!user) {
                 throw new Error('Email not found');
             }
-            return await this.otpService.sendOtp(email);
+            return await this.otpService.sendOtp(user.email, user.name);
         } catch (error) {
             throw error;
         }
     }
-
 
     async login(loginDto: LoginDto): Promise<any> {
         try {
             const { message, existingUser } = await this.userService.validateUser(loginDto.email, loginDto.password);
             const token = this.jwtAuthService.signToken({ id: existingUser._id, email: existingUser.email });
             if (message === 'User not activated') {
-                return await this.otpService.sendOtp(existingUser.email);
+                return await this.otpService.sendOtp(existingUser.email, existingUser.name);
             }
             return {
                 user: {
