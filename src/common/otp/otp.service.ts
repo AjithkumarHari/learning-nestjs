@@ -1,99 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';
-import * as Email from 'email-templates';
-import { join } from 'path';
+import { RedisService } from '../redis/redis.service';
+import { randomInt } from 'crypto';
 
 @Injectable()
 export class OtpService {
-    private otps = new Map<string, string>();
+    constructor(private readonly redis: RedisService) { }
 
-    private transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-        },
-    });
-
-    private emailInstance = new (Email as any)({
-        message: {
-            from: `Nest App <${process.env.EMAIL_USER}>`,
-        },
-        send: true,
-        preview: false,
-        transport: this.transporter,
-        views: {
-            root: join(__dirname, '..', '..', 'templates'),
-            options: {
-                extension: 'ejs',
-            },
-        },
-        juice: true,
-        juiceResources: {
-            preserveImportant: true,
-            webResources: {
-                relativeTo: join(__dirname, '..', '..', 'templates'),
-            },
-        },
-    });
-
-    async sendOtp(email: string, name: string) {
-        try {
-            const otp = Math.floor(100000 + Math.random() * 900000).toString();
-            this.otps.set(email, otp);
-            setTimeout(() => this.otps.delete(email), 5 * 60 * 1000);
-
-            const sendedOtp = await this.emailInstance.send({
-                template: 'otp',
-                message: {
-                    to: email,
-                },
-                locals: {
-                    otp: otp,
-                    name: name,
-                },
-            });
-
-            if (!sendedOtp) throw new Error('Error sending OTP');
-
-            return { otpSent: email };
-
-        } catch (error) {
-            throw error;
+    async createOtp(email: string, code?: string ): Promise<string> {
+        if (code) {
+            await this.redis.set(`otp:${email}`, code, 300); // 5 min expiry
+            return code;
         }
+        const otp = randomInt(100000, 999999).toString();
+        await this.redis.set(`otp:${email}`, otp, 300); // 5 min expiry
+        return otp;
     }
 
-    verifyOtp(email: string, code: string) {
-        try {
-            const stored = this.otps.get(email);
-            if (stored === code) {
-                this.otps.delete(email);
-                return true;
-            }
-            return false;
-        } catch (error) {
-            throw new Error('Error verifying OTP');
+    async verifyOtp(email: string, code: string): Promise<boolean> {
+        const storedOtp = await this.redis.get(`otp:${email}`);
+        if (storedOtp === code) {
+            await this.redis.del(`otp:${email}`);
+            return true;
         }
-    }
-
-    async sendSuccessEmail(email: string, name: string) {
-        try {
-            const sendedEmail = await this.emailInstance.send({
-                template: 'signup_success',
-                message: {
-                    to: email,
-                },
-                locals: {
-                    name: name,
-                },
-            });
-
-            if (!sendedEmail) throw new Error('Error sending success email');
-
-            return { emailSent: true };
-
-        } catch (error) {
-            throw error;
-        }
+        return false;
     }
 }

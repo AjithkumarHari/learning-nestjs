@@ -49,7 +49,6 @@ export class AuthController {
             throw new BadRequestException('Failed to resend OTP');
         }
     }
-                
 
     @Post('login')
     async login(@Body() loginDto: LoginDto, @Res() res: Response) {
@@ -65,6 +64,19 @@ export class AuthController {
             }
             throw new BadRequestException('User login failed');
         }
+    }
 
+    @Post('forgot-password')
+    async forgotPassword(@Body() emailDto: { email: string }, @Res() res: Response) {
+        try {
+            const response = await this.authService.forgotPassword(emailDto.email);
+            res.status(HttpStatus.OK);
+            res.send({ message: 'Password reset link sent successfully', ...response });
+        } catch (error) {
+            if (error.message === 'Email not found') {
+                throw new NotFoundException(error.message);
+            }
+            throw new BadRequestException('Failed to send password reset link');
+        }
     }
 }

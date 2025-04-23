@@ -10,7 +10,7 @@ import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 @Injectable()
 export class UsersService {
     constructor(@InjectModel(User.name)
-    private readonly userModel: Model<UserDocument>,
+        private readonly userModel: Model<UserDocument>,
         private readonly cloudinaryService: CloudinaryService
     ) { }
 
@@ -69,7 +69,7 @@ export class UsersService {
 
     async getUserByEmail(email: string) {
         try {
-            return await this.userModel.findOne({email}).select('-password').exec();
+            return await this.userModel.findOne({ email }).select('-password').exec();
         } catch (error) {
             throw error;
         }
