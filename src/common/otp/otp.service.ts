@@ -56,7 +56,7 @@ export class OtpService {
 
             if (!sendedOtp) throw new Error('Error sending OTP');
 
-            return { otpSent: true };
+            return { otpSent: email };
 
         } catch (error) {
             throw error;
