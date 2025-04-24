@@ -24,6 +24,7 @@ export class AuthService {
             const otp = await this.otpService.createOtp(user.email);
             return await this.emailService.sendEmail(user.email, 'otp', { name: user.name, otp });
         } catch (error) {
+            console.log("Error in user signup:", error);
             throw error;
         }
     }
@@ -53,6 +54,7 @@ export class AuthService {
                 token: token,
             };
         } catch (error) {
+            console.log("Error in user verification:", error);
             throw error;
         }
     }
@@ -66,6 +68,7 @@ export class AuthService {
             const otp = await this.otpService.createOtp(user.email);
             return await this.emailService.sendEmail(user.email, 'otp', { name: user.name, otp });
         } catch (error) {
+            console.log("Error in resending OTP:", error);
             throw error;
         }
     }
@@ -88,6 +91,7 @@ export class AuthService {
                 token: token,
             };
         } catch (error) {
+            console.log("Error in user login:", error);
             throw error;
         }
     }
@@ -101,10 +105,9 @@ export class AuthService {
             const token = await this.jwtAuthService.signToken({ id: user._id, email: user.email });
             await this.otpService.createOtp(user.email, token);
             const resetLink = `${process.env.ORIGIN_PORT}/auth/reset-password?email=${encodeURIComponent(email)}&token=${token}`;
-            console.log("reset link", resetLink);
-            return await this.emailService.sendEmail(user.email, 'forgot_password', { name: user.name, link: resetLink });
+            return await this.emailService.sendEmail(user.email, 'password_reset', { name: user.name, link: resetLink });
         } catch (error) {
-            console.log("error form auth service", error);
+            console.log("Error in password reset:", error);
             throw error;
         }
     }

@@ -29,6 +29,7 @@ export class UsersService {
             }
         }
         catch (error) {
+            console.log("Error in user creation:", error);
             throw error;
         }
     }
@@ -55,6 +56,7 @@ export class UsersService {
             };
         }
         catch (error) {
+            console.log("Error in user validation:", error);
             throw error;
         }
     }
@@ -63,6 +65,7 @@ export class UsersService {
         try {
             return await this.userModel.find().select('-password').exec();
         } catch (error) {
+            console.log("Error in fetching all users:", error);
             throw error;
         }
     }
@@ -71,6 +74,7 @@ export class UsersService {
         try {
             return await this.userModel.findOne({ email }).select('-password').exec();
         } catch (error) {
+            console.log("Error in fetching user by email:", error);
             throw error;
         }
     }
@@ -96,6 +100,7 @@ export class UsersService {
             return { id: _id, name, email, profileImage };
 
         } catch (error) {
+            console.log("Error in updating user:", error);
             throw error;
         }
     }
@@ -107,6 +112,7 @@ export class UsersService {
             user.isActive = true;
             return await user.save();
         } catch (error) {
+            console.log("Error in activating user:", error);
             throw error;
         }
     }

@@ -27,12 +27,12 @@ export class AuthController {
         try {
             const user = await this.authService.verifyOTP(otpDto.otp, otpDto.email);
             res.status(HttpStatus.OK);
-            res.send({ message: 'OTP verified successfully', ...user });
+            res.send({ message: 'User verified successfully', ...user });
         } catch (error) {
             if (error.message === 'Invalid OTP') {
                 throw new BadRequestException(error.message);
             }
-            throw new BadRequestException('OTP verification failed');
+            throw new BadRequestException('User verification failed');
         }
     }
 
@@ -71,12 +71,12 @@ export class AuthController {
         try {
             const response = await this.authService.forgotPassword(emailDto.email);
             res.status(HttpStatus.OK);
-            res.send({ message: 'Password reset link sent successfully', ...response });
+            res.send({ message: 'Password reset link sent', ...response });
         } catch (error) {
             if (error.message === 'Email not found') {
                 throw new NotFoundException(error.message);
             }
-            throw new BadRequestException('Failed to send password reset link');
+            throw new BadRequestException('Password reset failed');
         }
     }
 }

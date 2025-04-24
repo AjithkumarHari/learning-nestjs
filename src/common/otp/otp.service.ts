@@ -8,11 +8,11 @@ export class OtpService {
 
     async createOtp(email: string, code?: string ): Promise<string> {
         if (code) {
-            await this.redis.set(`otp:${email}`, code, 300); // 5 min expiry
+            await this.redis.set(`otp:${email}`, code, 300);
             return code;
         }
         const otp = randomInt(100000, 999999).toString();
-        await this.redis.set(`otp:${email}`, otp, 300); // 5 min expiry
+        await this.redis.set(`otp:${email}`, otp, 300);
         return otp;
     }
 
