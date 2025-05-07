@@ -4,7 +4,6 @@ import { Response } from 'express';
 import { AuthGuard } from 'src/common/jwt/guards/userAuth.guard';
 import { UpdateUserDto } from 'src/dto/updateUser.dto';
 
-
 @Controller('users')
 export class UsersController {
     constructor(private readonly usersService: UsersService) { }

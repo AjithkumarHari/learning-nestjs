@@ -102,7 +102,7 @@ export class AuthService {
             if (!user) {
                 throw new Error('Email not found');
             }
-            const token = await this.jwtAuthService.signToken({ id: user._id, email: user.email });
+            const token = this.jwtAuthService.signToken({ id: user._id, email: user.email });
             await this.otpService.createOtp(user.email, token);
             const resetLink = `${process.env.ORIGIN_PORT}/auth/reset-password?email=${encodeURIComponent(email)}&token=${token}`;
             return await this.emailService.sendEmail(user.email, 'password_reset', { name: user.name, link: resetLink });

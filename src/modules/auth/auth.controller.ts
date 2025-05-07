@@ -1,8 +1,10 @@
 import { Controller, Post, Body, Res, HttpStatus, BadRequestException, NotFoundException, ConflictException, UnauthorizedException } from '@nestjs/common';
+import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from '../../dto/login.dto';
 import { CreateUserDto } from '../../dto/createUser.dto';
-import { Response } from 'express';
+import { EmailDto } from 'src/dto/email.dto';
+import { OtpDto } from 'src/dto/otp.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -23,7 +25,7 @@ export class AuthController {
     }
 
     @Post('verify-otp')
-    async verifyOtp(@Body() otpDto: { otp: string, email: string }, @Res() res: Response) {
+    async verifyOtp(@Body() otpDto: OtpDto, @Res() res: Response) {
         try {
             const user = await this.authService.verifyOTP(otpDto.otp, otpDto.email);
             res.status(HttpStatus.OK);
@@ -37,7 +39,7 @@ export class AuthController {
     }
 
     @Post('resend-otp')
-    async resendOtp(@Body() emailDto: { email: string }, @Res() res: Response) {
+    async resendOtp(@Body() emailDto: EmailDto, @Res() res: Response) {
         try {
             const otp = await this.authService.resendOtp(emailDto.email);
             res.status(HttpStatus.OK);
@@ -67,7 +69,7 @@ export class AuthController {
     }
 
     @Post('forgot-password')
-    async forgotPassword(@Body() emailDto: { email: string }, @Res() res: Response) {
+    async forgotPassword(@Body() emailDto: EmailDto, @Res() res: Response) {
         try {
             const response = await this.authService.forgotPassword(emailDto.email);
             res.status(HttpStatus.OK);
